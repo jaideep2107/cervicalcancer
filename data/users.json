@@ -1,0 +1,22 @@
+{
+    "doctor1": {
+        "password": "123",
+        "role": "doctor",
+        "name": "Dr. Saravana Kumar"
+    },
+    "admin1": {
+        "password": "admin",
+        "role": "admin",
+        "name": "System Admin"
+    },
+    "rad1": {
+        "password": "123",
+        "role": "radiologist",
+        "name": "Chief Radiologist"
+    },
+    "jaideepreddy": {
+        "password": "123",
+        "role": "patient",
+        "name": "jaideep"
+    }
+}

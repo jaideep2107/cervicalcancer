@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cervical Cancer Prediction System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>.hidden { display: none; }</style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-blue-900">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl">
+            <h1 class="text-3xl font-bold text-center text-blue-900 mb-8">Cervical Cancer Prediction System</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div onclick="login('doctor')" class="cursor-pointer hover:bg-blue-50 p-6 border rounded-lg text-center shadow">
+                    <i class="fas fa-user-md text-4xl text-blue-600 mb-2"></i>
+                    <h3 class="font-bold text-xl">Doctor Login</h3>
+                    <p class="text-sm text-gray-500">Run predictions & view patient data</p>
+                </div>
+                <div onclick="login('radiologist')" class="cursor-pointer hover:bg-purple-50 p-6 border rounded-lg text-center shadow">
+                    <i class="fas fa-x-ray text-4xl text-purple-600 mb-2"></i>
+                    <h3 class="font-bold text-xl">Radiologist Login</h3>
+                    <p class="text-sm text-gray-500">Upload biopsy & imaging results</p>
+                </div>
+                <div onclick="login('admin')" class="cursor-pointer hover:bg-gray-50 p-6 border rounded-lg text-center shadow">
+                    <i class="fas fa-user-shield text-4xl text-gray-600 mb-2"></i>
+                    <h3 class="font-bold text-xl">Admin Login</h3>
+                    <p class="text-sm text-gray-500">Monitor system performance (95.35% Acc)</p>
+                </div>
+                <div onclick="login('patient')" class="cursor-pointer hover:bg-green-50 p-6 border rounded-lg text-center shadow">
+                    <i class="fas fa-user text-4xl text-green-600 mb-2"></i>
+                    <h3 class="font-bold text-xl">Patient Login</h3>
+                    <p class="text-sm text-gray-500">View your health reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden min-h-screen flex flex-col">
+        <nav class="bg-blue-800 text-white p-4 flex justify-between items-center shadow-lg">
+            <span class="font-bold text-lg"><i class="fas fa-dna mr-2"></i> CPSO-GA Predictor</span>
+            <div>
+                <span id="role-badge" class="bg-blue-700 px-3 py-1 rounded text-sm mr-4">Doctor Mode</span>
+                <button onclick="logout()" class="hover:text-red-300"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </nav>
+
+        <main class="container mx-auto p-6">
+            
+            <div id="doctor-view" class="view-section hidden">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">New Patient Prediction</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white p-6 rounded shadow">
+                        <form id="predict-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-bold">Age</label><input name="Age" type="number" class="w-full border p-2 rounded"></div>
+                            <div><label class="block text-sm font-bold">Sexual Partners</label><input name="Number of sexual partners" type="number" class="w-full border p-2 rounded"></div>
+                            <div><label class="block text-sm font-bold">First Intercourse (Age)</label><input name="First sexual intercourse" type="number" class="w-full border p-2 rounded"></div>
+                            <div><label class="block text-sm font-bold">Pregnancies</label><input name="Num of pregnancies" type="number" class="w-full border p-2 rounded"></div>
+                            <div><label class="block text-sm font-bold">Smokes (Years)</label><input name="Smokes (years)" type="number" class="w-full border p-2 rounded"></div>
+                            <div><label class="block text-sm font-bold">Hormonal Contraceptives (Years)</label><input name="Hormonal Contraceptives (years)" type="number" class="w-full border p-2 rounded"></div>
+                            
+                            <div class="md:col-span-2 mt-4">
+                                <label class="block text-sm font-bold mb-2">STDs History</label>
+                                <div class="flex gap-4">
+                                    <label><input type="checkbox" name="STDs:HPV" value="1"> HPV</label>
+                                    <label><input type="checkbox" name="STDs:HIV" value="1"> HIV</label>
+                                    <label><input type="checkbox" name="STDs:syphilis" value="1"> Syphilis</label>
+                                </div>
+                            </div>
+                            
+                            <div class="md:col-span-2 mt-6">
+                                <button type="button" onclick="predict()" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700">Run Analysis</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded shadow text-center flex flex-col justify-center">
+                        <h3 class="text-lg font-bold text-gray-600">Risk Assessment</h3>
+                        <div id="result-box" class="mt-4 hidden">
+                            <span id="risk-label" class="inline-block px-4 py-2 rounded-full text-white font-bold text-xl mb-2">High Risk</span>
+                            <p class="text-4xl font-bold text-gray-800" id="prob-score">89%</p>
+                            <p class="text-sm text-gray-500">Probability</p>
+                        </div>
+                        <p id="placeholder-text" class="text-gray-400 mt-4">Enter data to see results.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-view" class="view-section hidden">
+                <h2 class="text-2xl font-bold mb-6">Model Performance Stats</h2>
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-blue-500">
+                        <p class="text-gray-500">Accuracy</p><p class="text-2xl font-bold">95.35%</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-green-500">
+                        <p class="text-gray-500">Precision</p><p class="text-2xl font-bold">92.68%</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-yellow-500">
+                        <p class="text-gray-500">Recall</p><p class="text-2xl font-bold">88.42%</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow border-l-4 border-purple-500">
+                        <p class="text-gray-500">AUC-ROC</p><p class="text-2xl font-bold">96.27%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="radiologist-view" class="view-section hidden">
+                <h2 class="text-2xl font-bold">Radiologist Portal</h2>
+                <div class="bg-white p-8 rounded shadow text-center mt-4">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-gray-300 mb-4"></i>
+                    <p>Upload Biopsy / Imaging Data for Verification</p>
+                </div>
+            </div>
+             <div id="patient-view" class="view-section hidden">
+                <h2 class="text-2xl font-bold">My Health Record</h2>
+                <div class="bg-green-50 p-6 rounded border border-green-200 mt-4">
+                    <h3 class="font-bold text-green-800">Latest Screening: Normal</h3>
+                    <p>No immediate risk factors detected. Next screening recommended in 1 year.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function login(role) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(role + '-view').classList.remove('hidden');
+            document.getElementById('role-badge').innerText = role.charAt(0).toUpperCase() + role.slice(1) + ' Mode';
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        async function predict() {
+            const form = document.getElementById('predict-form');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+
+            const btn = document.querySelector('button[onclick="predict()"]');
+            btn.innerText = "Processing...";
+            
+            try {
+                const res = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                document.getElementById('placeholder-text').classList.add('hidden');
+                document.getElementById('result-box').classList.remove('hidden');
+                document.getElementById('prob-score').innerText = result.probability;
+                
+                const label = document.getElementById('risk-label');
+                label.innerText = result.prediction;
+                label.className = result.prediction === "High Risk" 
+                    ? "inline-block px-4 py-2 rounded-full text-white font-bold text-xl mb-2 bg-red-600"
+                    : "inline-block px-4 py-2 rounded-full text-white font-bold text-xl mb-2 bg-green-600";
+            } catch (e) {
+                alert("Error connecting to server");
+            }
+            btn.innerText = "Run Analysis";
+        }
+    </script>
+</body>
+</html>
