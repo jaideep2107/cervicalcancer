@@ -3,79 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Login - Cervical Cancer System</title>
+    <title>Jain University Medical Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%); }
+        body { background-color: #f3f4f6; }
+        .login-bg { 
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); 
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 font-sans">
 
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col md:flex-row h-[600px]">
         
-        <div class="md:w-1/2 bg-blue-900 text-white p-10 flex flex-col justify-center items-center text-center">
-            <div class="bg-blue-800 p-4 rounded-full mb-6 shadow-lg">
-                <i class="fas fa-dna text-6xl"></i>
+        <div class="md:w-1/2 login-bg text-white p-12 flex flex-col justify-between relative">
+            <div>
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="bg-white/10 p-2 rounded">
+                        <i class="fas fa-hospital-symbol text-3xl"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-wide">ONCO-PREDICT SYSTEM</span>
+                </div>
+                <h1 class="text-4xl font-bold leading-tight mb-4">Cervical Cancer<br>Risk Assessment</h1>
+                <p class="text-blue-200 text-lg">Advanced AI-driven diagnostics for early detection and patient management.</p>
             </div>
-            <h1 class="text-3xl font-bold mb-2">CPSO-GA Prediction</h1>
-            <p class="text-blue-200">Advanced Cervical Cancer Risk Assessment System</p>
-            <div class="mt-8 space-y-2 text-sm text-blue-300">
-                <p><i class="fas fa-check-circle mr-2"></i> 95.35% Accuracy</p>
-                <p><i class="fas fa-check-circle mr-2"></i> Hybrid Feature Selection</p>
-                <p><i class="fas fa-check-circle mr-2"></i> Secure Patient Data</p>
+            
+            <div class="text-xs text-blue-300">
+                <p>&copy; 2026 Jain (Deemed-to-be University)</p>
+                <p>Authorized Personnel Only</p>
             </div>
         </div>
 
-        <div class="md:w-1/2 p-10 flex flex-col justify-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Staff Login</h2>
+        <div class="md:w-1/2 p-12 flex flex-col justify-center bg-white">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Sign In</h2>
+                <p class="text-gray-500 text-sm mt-1">Access the secure medical dashboard</p>
+            </div>
             
             {% if error %}
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm" role="alert">
-                <p class="font-bold">Login Failed</p>
-                <p class="text-sm">{{ error }}</p>
+            <div class="bg-red-50 text-red-600 p-3 rounded text-sm mb-6 flex items-center gap-2 border border-red-100">
+                <i class="fas fa-exclamation-circle"></i> {{ error }}
             </div>
             {% endif %}
 
             <form action="/login" method="POST" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Username / ID</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">User ID</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
-                        </div>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
                         <input type="text" name="username" required 
-                               class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                               placeholder="e.g., doctor1">
+                               class="pl-10 w-full p-3 border border-gray-200 rounded focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition text-gray-700"
+                               placeholder="Enter your ID">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Password</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
                         <input type="password" name="password" required 
-                               class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                               class="pl-10 w-full p-3 border border-gray-200 rounded focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none transition text-gray-700"
                                placeholder="••••••••">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition duration-200 transform hover:-translate-y-0.5">
-                    Sign In to Dashboard
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-gray-500">
+                        <input type="checkbox" class="mr-2 rounded border-gray-300 text-blue-600"> Remember me
+                    </label>
+                    <a href="#" class="text-blue-600 hover:underline">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded shadow transition duration-200">
+                    Login
                 </button>
             </form>
-
-            <div class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
-                <p class="font-semibold mb-2">System Credentials (Demo):</p>
-                <div class="grid grid-cols-2 gap-2 text-left bg-gray-50 p-3 rounded">
-                    <span>👨‍⚕️ Doctor:</span> <span class="font-mono text-gray-700">doctor1 / 123</span>
-                    <span>☢️ Radiologist:</span> <span class="font-mono text-gray-700">rad1 / 123</span>
-                    <span>🛡️ Admin:</span> <span class="font-mono text-gray-700">admin1 / admin</span>
-                </div>
-            </div>
         </div>
     </div>
+
 </body>
 </html>

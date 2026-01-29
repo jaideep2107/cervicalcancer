@@ -3,306 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Dashboard</title>
+    <title>Clinical Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .tab-active { border-bottom: 3px solid #2563eb; color: #1e40af; background-color: #eff6ff; }
-        .tab-inactive { color: #6b7280; background-color: white; }
-        .tab-inactive:hover { color: #374151; background-color: #f9fafb; }
-        .hidden-tab { display: none; }
-        /* Custom Scrollbar for patient list */
-        .patient-scroll::-webkit-scrollbar { width: 6px; }
-        .patient-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
-        .patient-scroll::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        .patient-scroll::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        .tab-active { border-bottom: 2px solid #1e40af; color: #1e40af; background: #eff6ff; }
+        .tab-inactive { color: #6b7280; }
+        .hidden-el { display: none; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
+<body class="bg-gray-50 min-h-screen flex flex-col font-sans text-gray-800">
 
-    <nav class="bg-white shadow-md border-b z-10 px-6 py-3 flex justify-between items-center sticky top-0">
-        <div class="flex items-center gap-4">
-            <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-2.5 rounded-lg shadow">
-                <i class="fas fa-hospital-alt"></i>
+    <nav class="bg-white border-b px-6 py-3 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-800 text-white w-8 h-8 flex items-center justify-center rounded">
+                <i class="fas fa-plus"></i>
             </div>
             <div>
-                <h1 class="font-bold text-gray-800 text-lg leading-tight">Cervical Cancer Prediction</h1>
-                <p class="text-xs text-blue-600 font-semibold">User: {{ user.name }} <span class="bg-gray-200 text-gray-600 px-1.5 rounded ml-1 text-[10px]">{{ user.role|upper }}</span></p>
+                <h1 class="font-bold text-gray-800 leading-tight">Onco-Predict</h1>
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Secure Clinical Environment</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden md:block">
+                <p class="text-sm font-bold">{{ user.name }}</p>
+                <p class="text-xs text-gray-500">{{ user.role|upper }}</p>
+            </div>
             {% if user.role in ['admin', 'doctor'] %}
-            <button onclick="toggleModal('create-patient-modal')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 shadow transition flex items-center gap-2">
-                <i class="fas fa-user-plus"></i> New Patient
+            <button onclick="toggleModal('create-patient-modal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition shadow-sm">
+                <i class="fas fa-user-plus mr-1"></i> Add Patient
             </button>
             {% endif %}
-            <a href="/logout" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition border border-red-100">
-                <i class="fas fa-sign-out-alt mr-1"></i> Logout
-            </a>
+            <a href="/logout" class="text-gray-400 hover:text-red-500 ml-2"><i class="fas fa-sign-out-alt text-lg"></i></a>
         </div>
     </nav>
 
     <main class="container mx-auto p-6 flex gap-6 h-[calc(100vh-80px)]">
         
-        <aside class="w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+        <aside class="w-1/4 bg-white rounded border border-gray-200 flex flex-col h-full shadow-sm">
             <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                <h2 class="font-bold text-gray-700"><i class="fas fa-users mr-2"></i>Patients</h2>
-                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ patients|length }} Records</span>
+                <h2 class="font-bold text-gray-600 text-sm uppercase">Patient Registry</h2>
+                <span class="bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">{{ patients|length }}</span>
             </div>
-            
-            <div class="patient-scroll overflow-y-auto flex-grow divide-y divide-gray-100">
+            <div class="overflow-y-auto flex-grow">
                 {% for pid, pdata in patients.items() %}
-                <div onclick="selectPatient('{{ pid }}', '{{ pdata.name }}', '{{ pdata.age }}', '{{ pdata.risk_status }}')" 
-                     class="p-4 cursor-pointer hover:bg-blue-50 transition group border-l-4 border-transparent hover:border-blue-500">
+                <div onclick="loadPatient('{{ pid }}')" class="p-4 border-b hover:bg-blue-50 cursor-pointer transition group">
                     <div class="flex justify-between items-start mb-1">
-                        <h3 class="font-bold text-gray-800 group-hover:text-blue-700">{{ pdata.name }}</h3>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide
+                        <span class="font-bold text-gray-700 group-hover:text-blue-700">{{ pdata.name }}</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded font-bold uppercase
                             {% if pdata.risk_status == 'High Risk' %} bg-red-100 text-red-700 
                             {% elif pdata.risk_status == 'Low Risk' %} bg-green-100 text-green-700 
                             {% else %} bg-gray-100 text-gray-500 {% endif %}">
                             {{ pdata.risk_status }}
                         </span>
                     </div>
-                    <div class="flex justify-between text-xs text-gray-500">
+                    <div class="text-xs text-gray-400 group-hover:text-blue-400 flex justify-between">
                         <span>ID: {{ pid }}</span>
                         <span>Age: {{ pdata.age }}</span>
                     </div>
-                </div>
-                {% else %}
-                <div class="p-8 text-center text-gray-400">
-                    <i class="fas fa-folder-open text-3xl mb-2"></i>
-                    <p class="text-sm">No patients found.</p>
                 </div>
                 {% endfor %}
             </div>
         </aside>
 
-        <section class="w-3/4 bg-white rounded-xl shadow-sm border border-gray-200 p-0 relative flex flex-col overflow-hidden">
+        <section class="w-3/4 bg-white rounded border border-gray-200 h-full shadow-sm relative flex flex-col">
             
-            <div id="welcome-msg" class="flex flex-col items-center justify-center h-full text-gray-300">
-                <i class="fas fa-notes-medical text-6xl mb-4 text-gray-200"></i>
-                <p class="text-xl font-medium text-gray-400">Select a patient to access records</p>
-                <p class="text-sm">View Analysis, Notes, and Imaging</p>
+            <div id="welcome-view" class="flex flex-col items-center justify-center h-full text-gray-300">
+                <i class="fas fa-file-medical-alt text-6xl mb-4"></i>
+                <p class="text-lg font-medium">Select a patient record to view</p>
             </div>
 
-            <div id="patient-detail" class="hidden-tab flex flex-col h-full">
-                <header class="bg-gray-50 p-6 border-b flex justify-between items-center">
+            <div id="patient-view" class="hidden-el flex flex-col h-full">
+                <header class="p-6 border-b flex justify-between items-start bg-gray-50">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                            <span id="detail-name">Patient Name</span>
-                            <span id="detail-status-badge" class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">Pending</span>
-                        </h2>
-                        <div class="flex gap-4 mt-1 text-sm text-gray-500">
-                            <span><i class="fas fa-id-card mr-1"></i> ID: <span id="detail-id" class="font-mono text-gray-700"></span></span>
-                            <span><i class="fas fa-birthday-cake mr-1"></i> Age: <span id="detail-age" class="font-mono text-gray-700"></span></span>
+                        <h2 class="text-2xl font-bold text-gray-800" id="pt-name">--</h2>
+                        <div class="flex gap-4 mt-1 text-sm text-gray-500 font-mono">
+                            <span>ID: <span id="pt-id">--</span></span>
+                            <span>AGE: <span id="pt-age">--</span></span>
                         </div>
                     </div>
                 </header>
 
                 <div class="flex border-b">
-                    <button onclick="switchTab('tab-predict')" class="flex-1 py-4 font-semibold text-sm transition border-r tab-active" id="btn-predict">
-                        <i class="fas fa-microscope mr-2"></i> AI Analysis
-                    </button>
-                    <button onclick="switchTab('tab-notes')" class="flex-1 py-4 font-semibold text-sm transition border-r tab-inactive" id="btn-notes">
-                        <i class="fas fa-user-md mr-2"></i> Doctor Notes
-                    </button>
-                    <button onclick="switchTab('tab-images')" class="flex-1 py-4 font-semibold text-sm transition tab-inactive" id="btn-images">
-                        <i class="fas fa-x-ray mr-2"></i> Radiology / Biopsy
-                    </button>
+                    <button onclick="switchTab('analysis')" id="btn-analysis" class="flex-1 py-3 text-sm font-bold tab-active">AI Analysis</button>
+                    <button onclick="switchTab('notes')" id="btn-notes" class="flex-1 py-3 text-sm font-bold tab-inactive">Clinical Notes</button>
+                    <button onclick="switchTab('imaging')" id="btn-imaging" class="flex-1 py-3 text-sm font-bold tab-inactive">Imaging</button>
                 </div>
 
-                <div class="flex-grow overflow-y-auto p-8 bg-gray-50/50">
-
-                    <div id="tab-predict" class="tab-content">
-                        <div class="max-w-4xl mx-auto">
-                            {% if user.role == 'doctor' %}
-                            <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
-                                <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Clinical Parameters</h3>
-                                <form id="predict-form" class="grid grid-cols-2 gap-6">
-                                    <input type="hidden" id="pred-patient-id" name="patient_id_context">
-                                    
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">Age</label><input type="number" name="Age" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">Sexual Partners</label><input type="number" name="Number of sexual partners" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">Pregnancies</label><input type="number" name="Num of pregnancies" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">Smoking (Years)</label><input type="number" name="Smokes (years)" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">Contraceptives (Years)</label><input type="number" name="Hormonal Contraceptives (years)" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-                                    <div><label class="text-xs font-bold text-gray-500 uppercase block mb-1">STDs (Count)</label><input type="number" name="STDs (number)" class="w-full bg-gray-50 border border-gray-300 p-2.5 rounded focus:ring-2 focus:ring-blue-500 outline-none transition"></div>
-
-                                    <div class="col-span-2 pt-4">
-                                        <button type="button" onclick="runPrediction()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg shadow-md hover:shadow-lg transition flex justify-center items-center gap-2">
-                                            <i class="fas fa-calculator"></i> Run CPSO-GA Prediction Model
-                                        </button>
-                                    </div>
-                                </form>
+                <div class="flex-grow overflow-y-auto p-8 bg-gray-50/30">
+                    
+                    <div id="tab-analysis" class="tab-pane">
+                        {% if user.role == 'doctor' %}
+                        <form id="predict-form" class="max-w-3xl mx-auto bg-white p-6 rounded shadow-sm border">
+                            <h3 class="font-bold text-gray-700 mb-4 border-b pb-2">Risk Factors Input</h3>
+                            <input type="hidden" id="pred-pid" name="patient_id_context">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><label class="block font-bold mb-1 text-gray-500">Age</label><input type="number" name="Age" class="w-full border p-2 rounded"></div>
+                                <div><label class="block font-bold mb-1 text-gray-500">Smoking (Years)</label><input type="number" name="Smokes (years)" class="w-full border p-2 rounded"></div>
+                                <div><label class="block font-bold mb-1 text-gray-500">Hormonal Contraceptives (Years)</label><input type="number" name="Hormonal Contraceptives (years)" class="w-full border p-2 rounded"></div>
+                                <div><label class="block font-bold mb-1 text-gray-500">IUD (Years)</label><input type="number" name="IUD (years)" class="w-full border p-2 rounded"></div>
+                                <div><label class="block font-bold mb-1 text-gray-500">STDs (Count)</label><input type="number" name="STDs (number)" class="w-full border p-2 rounded"></div>
                             </div>
-                            
-                            <div id="pred-result" class="hidden animate-pulse">
-                                <div class="bg-white rounded-lg shadow border-l-4 p-6 flex items-center justify-between" id="result-box-style">
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-500 uppercase">Model Assessment</p>
-                                        <h3 class="text-3xl font-bold mt-1" id="res-text">--</h3>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm text-gray-500">Probability</p>
-                                        <p class="text-4xl font-bold text-blue-900" id="res-prob">--</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% else %}
-                            <div class="text-center py-20 bg-gray-100 rounded border border-dashed border-gray-300">
-                                <i class="fas fa-lock text-4xl text-gray-300 mb-3"></i>
-                                <p class="text-gray-500 font-medium">Access Restricted</p>
-                                <p class="text-sm text-gray-400">Only authorized doctors can run predictions.</p>
-                            </div>
-                            {% endif %}
+                            <button type="button" onclick="runPrediction()" class="mt-6 w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded">Execute Model</button>
+                        </form>
+                        <div id="pred-result" class="hidden-el max-w-3xl mx-auto mt-4 bg-white border-l-4 p-6 shadow-sm rounded flex justify-between items-center">
+                            <div><p class="text-xs uppercase font-bold text-gray-400">Prediction</p><h3 id="res-status" class="text-2xl font-bold">--</h3></div>
+                            <div class="text-right"><p class="text-xs uppercase font-bold text-gray-400">Probability</p><h3 id="res-prob" class="text-2xl font-bold text-blue-900">--</h3></div>
                         </div>
+                        {% else %}
+                        <div class="text-center py-20 text-gray-400"><p>Restricted Access: Doctor Authorization Required.</p></div>
+                        {% endif %}
                     </div>
 
-                    <div id="tab-notes" class="tab-content hidden-tab">
-                        <div class="max-w-4xl mx-auto">
-                            <div id="notes-list" class="space-y-4 mb-8">
-                                </div>
-                            {% if user.role == 'doctor' %}
-                            <div class="bg-white p-4 rounded-lg shadow-sm border mt-4">
-                                <h4 class="text-sm font-bold text-gray-700 mb-2">Add Clinical Note</h4>
-                                <textarea id="new-note" rows="3" class="w-full border rounded p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter observation details..."></textarea>
-                                <div class="mt-3 text-right">
-                                    <button onclick="addNote()" class="bg-gray-800 text-white px-6 py-2 rounded hover:bg-black transition text-sm font-bold">
-                                        <i class="fas fa-paper-plane mr-2"></i> Save Note
-                                    </button>
-                                </div>
-                            </div>
-                            {% endif %}
+                    <div id="tab-notes" class="tab-pane hidden-el">
+                        <div id="notes-container" class="space-y-3 max-w-3xl mx-auto mb-6"></div>
+                        {% if user.role == 'doctor' %}
+                        <div class="max-w-3xl mx-auto flex gap-2">
+                            <input id="note-input" class="flex-grow border p-2 rounded" placeholder="Clinical observation...">
+                            <button onclick="addNote()" class="bg-gray-800 text-white px-4 rounded font-bold">Add</button>
                         </div>
+                        {% endif %}
                     </div>
 
-                    <div id="tab-images" class="tab-content hidden-tab">
-                        <div class="max-w-5xl mx-auto">
-                            <div id="images-gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                                </div>
-                            {% if user.role == 'radiologist' %}
-                            <div class="bg-purple-50 border border-purple-100 p-6 rounded-lg text-center">
-                                <i class="fas fa-cloud-upload-alt text-4xl text-purple-300 mb-3"></i>
-                                <h3 class="font-bold text-purple-900">Upload Biopsy / Scan</h3>
-                                <p class="text-sm text-purple-600 mb-4">Supported formats: JPG, PNG, PDF</p>
-                                <input type="file" id="upload-file" class="hidden" onchange="document.getElementById('file-label').innerText = this.files[0].name">
-                                <div class="flex justify-center gap-3">
-                                    <label for="upload-file" id="file-label" class="cursor-pointer bg-white border border-purple-200 text-purple-700 px-4 py-2 rounded hover:bg-purple-50 transition">Choose File</label>
-                                    <button onclick="uploadImage()" class="bg-purple-600 text-white px-6 py-2 rounded font-bold hover:bg-purple-700 transition">Upload</button>
-                                </div>
-                            </div>
-                            {% endif %}
+                    <div id="tab-imaging" class="tab-pane hidden-el">
+                        <div id="img-container" class="grid grid-cols-4 gap-4 max-w-4xl mx-auto mb-6"></div>
+                        {% if user.role == 'radiologist' %}
+                        <div class="max-w-4xl mx-auto bg-purple-50 p-6 rounded border border-purple-100 text-center">
+                            <label class="block font-bold text-purple-800 mb-2">Upload Diagnostic Imaging</label>
+                            <input type="file" id="upload-input" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200">
+                            <button onclick="uploadImage()" class="mt-3 bg-purple-700 text-white px-6 py-2 rounded font-bold">Upload</button>
                         </div>
+                        {% endif %}
                     </div>
-
                 </div>
             </div>
         </section>
     </main>
 
-    <div id="create-patient-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all scale-100">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-800">Create New Patient</h3>
-                <button onclick="toggleModal('create-patient-modal')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-            </div>
+    <div id="create-patient-modal" class="hidden-el fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Register New Patient</h3>
+            
+            <div id="modal-error" class="hidden-el bg-red-100 text-red-700 p-2 text-xs rounded mb-4"></div>
+
             <form id="create-form" class="space-y-4">
-                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label><input name="name" class="w-full border p-2.5 rounded focus:border-blue-500 outline-none"></div>
-                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Patient ID (Login ID)</label><input name="patient_id" class="w-full border p-2.5 rounded focus:border-blue-500 outline-none"></div>
-                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label><input name="password" type="password" class="w-full border p-2.5 rounded focus:border-blue-500 outline-none"></div>
-                <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Age</label><input name="age" type="number" class="w-full border p-2.5 rounded focus:border-blue-500 outline-none"></div>
-                <div class="pt-4 flex justify-end gap-3">
-                    <button type="button" onclick="toggleModal('create-patient-modal')" class="text-gray-500 font-medium px-4 py-2">Cancel</button>
-                    <button type="button" onclick="createPatient()" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 shadow">Create Profile</button>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Full Name</label>
+                    <input name="name" class="w-full border p-2 rounded text-sm focus:border-blue-500 outline-none" placeholder="Alphabets only">
+                    <p class="text-[10px] text-gray-400">Example: John Doe</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Patient ID</label>
+                    <input name="patient_id" class="w-full border p-2 rounded text-sm focus:border-blue-500 outline-none" placeholder="Letters & Numbers">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
+                    <input name="password" type="password" class="w-full border p-2 rounded text-sm focus:border-blue-500 outline-none">
+                    <p class="text-[10px] text-gray-400">8-16 chars, 1 Upper, 1 Number, 1 Special</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Age</label>
+                    <input name="age" type="number" class="w-full border p-2 rounded text-sm focus:border-blue-500 outline-none">
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="toggleModal('create-patient-modal')" class="text-gray-500 hover:text-gray-700">Cancel</button>
+                    <button type="button" onclick="validateAndCreate()" class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded font-bold shadow">Create</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const patientsData = {{ patients | tojson }};
-        let currentPid = null;
+        const patients = {{ patients | tojson }};
+        let currPid = null;
 
         function toggleModal(id) { 
             const el = document.getElementById(id);
-            el.classList.toggle('hidden');
+            el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+            document.getElementById('modal-error').style.display = 'none';
         }
 
-        function selectPatient(pid, name, age, status) {
-            currentPid = pid;
-            document.getElementById('welcome-msg').classList.add('hidden');
-            document.getElementById('patient-detail').classList.remove('hidden-tab');
-            
-            // Update Header Info
-            document.getElementById('detail-name').innerText = name;
-            document.getElementById('detail-id').innerText = pid;
-            document.getElementById('detail-age').innerText = age;
-            
-            // Update Status Badge color
-            const statusBadge = document.getElementById('detail-status-badge');
-            statusBadge.innerText = status;
-            statusBadge.className = `text-xs px-2 py-1 rounded font-bold uppercase ${
-                status === 'High Risk' ? 'bg-red-100 text-red-700' : 
-                status === 'Low Risk' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
-            }`;
-            
-            // Set hidden ID for forms
-            const hiddenInput = document.getElementById('pred-patient-id');
-            if(hiddenInput) hiddenInput.value = pid;
-
-            // Load Notes
-            const notesList = document.getElementById('notes-list');
-            notesList.innerHTML = '';
-            if(patientsData[pid].notes && patientsData[pid].notes.length > 0) {
-                patientsData[pid].notes.forEach(note => {
-                    notesList.innerHTML += `
-                    <div class="bg-white p-4 rounded border-l-4 border-yellow-400 shadow-sm">
-                        <p class="text-sm text-gray-700 font-mono">${note}</p>
-                    </div>`;
-                });
-            } else {
-                notesList.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="far fa-clipboard text-2xl mb-2"></i><p>No clinical notes available.</p></div>';
-            }
-
-            // Load Images
-            const imgGallery = document.getElementById('images-gallery');
-            imgGallery.innerHTML = '';
-            if(patientsData[pid].images && patientsData[pid].images.length > 0) {
-                patientsData[pid].images.forEach(img => {
-                    imgGallery.innerHTML += `
-                        <a href="/uploads/${img}" target="_blank" class="group relative block rounded-lg overflow-hidden border shadow hover:shadow-lg transition">
-                            <div class="aspect-w-1 aspect-h-1 bg-gray-200">
-                                <img src="/uploads/${img}" class="object-cover w-full h-32 opacity-90 group-hover:opacity-100 transition">
-                            </div>
-                            <div class="bg-white p-2 text-center text-xs text-blue-600 font-bold border-t">View File</div>
-                        </a>`;
-                });
-            } else {
-                imgGallery.innerHTML = '<div class="col-span-full text-center py-8 text-gray-400"><i class="far fa-images text-2xl mb-2"></i><p>No imaging data uploaded.</p></div>';
-            }
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-tab'));
-            document.getElementById(tabId).classList.remove('hidden-tab');
-            
-            // Reset Styles
-            ['btn-predict', 'btn-notes', 'btn-images'].forEach(btn => {
-                const el = document.getElementById(btn);
-                el.classList.remove('tab-active', 'text-blue-700', 'bg-blue-50');
-                el.classList.add('tab-inactive', 'text-gray-500');
-            });
-            
-            const activeBtn = document.getElementById(tabId.replace('tab', 'btn'));
-            activeBtn.classList.remove('tab-inactive', 'text-gray-500');
-            activeBtn.classList.add('tab-active', 'text-blue-700', 'bg-blue-50');
-        }
-
-        // --- API CALLS ---
-        
-        async function createPatient() {
+        // STRICT CLIENT-SIDE VALIDATION
+        async function validateAndCreate() {
             const form = document.getElementById('create-form');
             const data = Object.fromEntries(new FormData(form).entries());
+            const errBox = document.getElementById('modal-error');
+            
+            // Regex Rules
+            const nameRegex = /^[A-Za-z\s]+$/;
+            const idRegex = /^[A-Za-z0-9]+$/;
+            const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+
+            if (!nameRegex.test(data.name)) {
+                showError("Name must contain alphabets only."); return;
+            }
+            if (!idRegex.test(data.patient_id)) {
+                showError("ID must be alphanumeric (letters & numbers)."); return;
+            }
+            if (!passRegex.test(data.password)) {
+                showError("Password must be 8-16 chars, with 1 Uppercase, 1 Number, 1 Special char."); return;
+            }
+
+            // Send to Backend
             try {
                 const res = await fetch('/create_patient', {
                     method: 'POST',
@@ -310,71 +212,74 @@
                     body: JSON.stringify(data)
                 });
                 const json = await res.json();
-                if(json.status === 'success') location.reload();
-                else alert(json.message);
-            } catch(e) { alert("Server Error: Check connection"); }
+                if (json.status === 'success') location.reload();
+                else showError(json.message);
+            } catch (e) { showError("Server connection failed."); }
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('modal-error');
+            el.innerText = msg;
+            el.style.display = 'block';
+        }
+
+        function loadPatient(pid) {
+            currPid = pid;
+            document.getElementById('welcome-view').style.display = 'none';
+            document.getElementById('patient-view').style.display = 'flex';
+            
+            const p = patients[pid];
+            document.getElementById('pt-name').innerText = p.name;
+            document.getElementById('pt-id').innerText = pid;
+            document.getElementById('pt-age').innerText = p.age;
+            if(document.getElementById('pred-pid')) document.getElementById('pred-pid').value = pid;
+
+            // Notes
+            const nBox = document.getElementById('notes-container');
+            nBox.innerHTML = p.notes.length ? p.notes.map(n => `<div class="bg-yellow-50 p-3 border border-yellow-200 rounded text-sm">${n}</div>`).join('') : '<p class="text-gray-400 italic">No notes.</p>';
+
+            // Images
+            const iBox = document.getElementById('img-container');
+            iBox.innerHTML = p.images.length ? p.images.map(img => `<a href="/uploads/${img}" target="_blank" class="block border rounded p-1 hover:border-blue-500"><img src="/uploads/${img}" class="h-32 w-full object-cover"></a>`).join('') : '<p class="col-span-4 text-gray-400 italic text-center">No images.</p>';
+        }
+
+        function switchTab(t) {
+            ['analysis', 'notes', 'imaging'].forEach(x => {
+                document.getElementById('tab-'+x).style.display = 'none';
+                document.getElementById('btn-'+x).className = 'flex-1 py-3 text-sm font-bold tab-inactive';
+            });
+            document.getElementById('tab-'+t).style.display = 'block';
+            document.getElementById('btn-'+t).className = 'flex-1 py-3 text-sm font-bold tab-active';
+        }
+
+        // --- PREDICTION & NOTES & UPLOAD (Standard Fetch) ---
+        async function runPrediction() {
+            const form = document.getElementById('predict-form');
+            const data = Object.fromEntries(new FormData(form).entries());
+            const res = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+            const json = await res.json();
+            const rDiv = document.getElementById('pred-result');
+            rDiv.style.display = 'flex';
+            document.getElementById('res-status').innerText = json.prediction;
+            document.getElementById('res-status').className = json.prediction === 'High Risk' ? 'text-2xl font-bold text-red-600' : 'text-2xl font-bold text-green-600';
+            rDiv.className = json.prediction === 'High Risk' ? 'max-w-3xl mx-auto mt-4 bg-red-50 border-l-4 border-red-500 p-6 shadow-sm rounded flex justify-between items-center' : 'max-w-3xl mx-auto mt-4 bg-green-50 border-l-4 border-green-500 p-6 shadow-sm rounded flex justify-between items-center';
+            document.getElementById('res-prob').innerText = json.probability;
         }
 
         async function addNote() {
-            const note = document.getElementById('new-note').value;
-            if(!note) return;
-            await fetch('/add_note', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({patient_id: currentPid, note: note})
-            });
+            const txt = document.getElementById('note-input').value;
+            if(!txt) return;
+            await fetch('/add_note', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({patient_id: currPid, note: txt})});
             location.reload();
         }
 
         async function uploadImage() {
-            const fileInput = document.getElementById('upload-file');
-            if(fileInput.files.length === 0) return alert("Select a file first");
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('patient_id', currentPid);
-
-            await fetch('/upload_biopsy', { method: 'POST', body: formData });
+            const f = document.getElementById('upload-input').files[0];
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('patient_id', currPid);
+            await fetch('/upload_biopsy', { method: 'POST', body: fd });
             location.reload();
-        }
-
-        async function runPrediction() {
-            const form = document.getElementById('predict-form');
-            const formData = new FormData(form);
-            const data = {};
-            formData.forEach((value, key) => data[key] = value);
-
-            const btn = document.querySelector('#predict-form button');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch('/predict', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                
-                const resDiv = document.getElementById('pred-result');
-                const boxStyle = document.getElementById('result-box-style');
-                
-                resDiv.classList.remove('hidden');
-                resDiv.classList.remove('animate-pulse');
-                document.getElementById('res-prob').innerText = result.probability;
-                document.getElementById('res-text').innerText = result.prediction;
-                
-                if(result.prediction === "High Risk") {
-                    document.getElementById('res-text').className = "text-3xl font-bold mt-1 text-red-600";
-                    boxStyle.className = "bg-red-50 rounded-lg shadow border-l-4 border-red-500 p-6 flex items-center justify-between";
-                } else {
-                    document.getElementById('res-text').className = "text-3xl font-bold mt-1 text-green-600";
-                    boxStyle.className = "bg-green-50 rounded-lg shadow border-l-4 border-green-500 p-6 flex items-center justify-between";
-                }
-            } catch (e) { alert("Prediction Service Offline"); }
-            
-            btn.innerHTML = '<i class="fas fa-calculator"></i> Run CPSO-GA Prediction Model';
-            btn.disabled = false;
         }
     </script>
 </body>
